@@ -20,40 +20,13 @@
                 </form>
             </div>
         </nav>
-        <!-- Agrega esto en la sección de búsqueda -->
-        <div class="search-section">
-            <form th:action="@{/buscar}" method="get" class="search-form">
-                <input type="text" name="query" placeholder="Buscar libros...">
-                <button type="submit">Buscar Libros</button>
-            </form>
-            <br>
-            <form th:action="@{/buscar-peliculas}" method="get" class="search-form">
-                <input type="text" name="query" placeholder="Buscar películas...">
-                <button type="submit">Buscar Películas</button>
-            </form>
-        </div>
-        <!-- Barra de búsqueda
+        <!-- Barra de búsqueda-->
         <div class="search-section">
             <form th:action="@{/buscar}" method="get" class="search-form">
                 <input type="text" name="query" placeholder="Buscar libros...">
                 <button type="submit">Buscar</button>
             </form>
-        </div> -->
-        <div class="peliculas-favoritas">
-            <h2>Tus Películas Favoritas</h2>
-            <div th:if="${peliculasFavoritas.empty}">
-                <p>Aún no tienes películas favoritas</p>
-            </div>
-            <div th:unless="${peliculasFavoritas.empty}" class="movie-grid">
-                <div class="movie-card" th:each="pelicula : ${peliculasFavoritas}">
-                    <img th:if="${pelicula.posterUrl}" th:src="${pelicula.posterUrl}" alt="Poster">
-                    <div class="movie-info">
-                        <h3 th:text="${pelicula.titulo}"></h3>
-                        <p>Año: <span th:text="${pelicula.anio}"></span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </div> 
         <!-- Sección de favoritos -->
         <div class="favoritos-section">
             <h2>Tus Libros Favoritos</h2>
@@ -91,30 +64,6 @@
                         </p>
                         <form th:action="@{'/favoritos/agregar/' + ${libro.id}}" method="post">
                             <button type="submit" class="btn-favorite">❤️ Añadir a favoritos</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Agrega esta sección después de la sección de recomendaciones de libros -->
-        <div class="recomendaciones-section">
-            <h2>Películas Recomendadas</h2>
-            <div th:if="${recomendacionesPeliculas.empty}">
-                <p>No hay suficientes películas recomendadas disponibles.</p>
-            </div>
-            <div th:unless="${recomendacionesPeliculas.empty}" class="movie-grid">
-                <div class="movie-card" th:each="pelicula : ${recomendacionesPeliculas}">
-                    <img th:if="${pelicula.Poster}" th:src="${pelicula.Poster}" alt="Poster">
-                    <div class="movie-info">
-                        <h3 th:text="${pelicula.Title}"></h3>
-                        <p>Año: <span th:text="${pelicula.Year}"></span></p>
-                        <form th:if="${!peliculaService.esFavorita(pelicula.imdbID, usuario)}" 
-                            th:action="@{'/favoritos-peliculas/agregar/' + ${pelicula.imdbID}}" method="post">
-                            <button type="submit" class="btn-favorite">❤️ Añadir a favoritos</button>
-                        </form>
-                        <form th:if="${peliculaService.esFavorita(pelicula.imdbID, usuario)}" 
-                            th:action="@{'/favoritos-peliculas/eliminar/' + ${pelicula.imdbID}}" method="post">
-                            <button type="submit" class="btn-remove">❌ Eliminar de favoritos</button>
                         </form>
                     </div>
                 </div>

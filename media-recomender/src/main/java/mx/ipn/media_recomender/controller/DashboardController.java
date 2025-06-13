@@ -1,15 +1,11 @@
 package mx.ipn.media_recomender.controller;
 
 import mx.ipn.media_recomender.dto.GoogleBooksResponse;
-import mx.ipn.media_recomender.dto.OmdbMovieResponse;
 import mx.ipn.media_recomender.model.LibroFavorito;
-import mx.ipn.media_recomender.model.PeliculaFavorita;
 import mx.ipn.media_recomender.model.Usuario;
 import mx.ipn.media_recomender.repository.UsuarioRepository;
 import mx.ipn.media_recomender.service.GoogleBooksService;
 import mx.ipn.media_recomender.service.LibroService;
-import mx.ipn.media_recomender.service.OmdbService;
-import mx.ipn.media_recomender.service.PeliculaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,21 +22,15 @@ public class DashboardController {
 
     private final UsuarioRepository usuarioRepository;
     private final GoogleBooksService googleBooksService;
-    private final LibroService libroService;
-    private final PeliculaService peliculaService;
-    private final OmdbService omdbService; // Nuevo campo
+    private final LibroService libroService; // Nuevo campo
 
     @Autowired
     public DashboardController(UsuarioRepository usuarioRepository,
                              GoogleBooksService googleBooksService,
-                             LibroService libroService,
-                             PeliculaService peliculaService,
-                             OmdbService omdbService) { // Nuevo parámetro
+                             LibroService libroService) { // Nuevo parámetro
         this.usuarioRepository = usuarioRepository;
         this.googleBooksService = googleBooksService;
-        this.libroService = libroService;
-        this.peliculaService = peliculaService;
-        this.omdbService = omdbService; // Inicialización
+        this.libroService = libroService; // Inicialización
     }
 
     @GetMapping("/dashboard")
@@ -50,7 +40,6 @@ public class DashboardController {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
             
             List<LibroFavorito> favoritos = libroService.obtenerFavoritosActivos(usuario);
-            List<PeliculaFavorita> peliculasFavoritas = peliculaService.obtenerFavoritasActivas(usuario);
             
             // Simplificar temporalmente las recomendaciones para pruebas
             GoogleBooksResponse recomendaciones = googleBooksService
@@ -79,7 +68,6 @@ public class DashboardController {
                 
             model.addAttribute("usuario", usuario);
             model.addAttribute("favoritos", favoritos);
-            model.addAttribute("peliculasFavoritas", peliculasFavoritas);
             
             // Temporarily disable API calls for debugging
             model.addAttribute("recomendaciones", recomendacionesLimitadas);
