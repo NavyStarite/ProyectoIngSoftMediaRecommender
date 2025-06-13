@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -22,7 +23,13 @@ public class Usuario implements UserDetails {
     
     @Column(nullable = false, length = 100)
     private String password;
-    
+
+    @Column
+    private String generoPreferido; // o usa una lista/relación si necesitas múltiples géneros
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<LibroFavorito> librosFavoritos = new ArrayList<>();
+
     @Column(nullable = false, unique = true, length = 100)
     private String email;
     

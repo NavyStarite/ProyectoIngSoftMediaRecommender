@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar Películas</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <a th:href="@{/dashboard}">Volver al Dashboard</a>
+        </nav>
+
+        <h1>Resultados para: <span th:text="${query}"></span></h1>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div th:if="${resultados.Search != null}" class="movie-grid">
+            <div class="movie-card" th:each="pelicula : ${resultados.Search}">
+                <img th:if="${pelicula.Poster}" th:src="${pelicula.Poster}" alt="Poster">
+                <div class="movie-info">
+                    <h3 th:text="${pelicula.Title}"></h3>
+                    <p>Año: <span th:text="${pelicula.Year}"></span></p>
+                    
+                    <form th:if="${!peliculaService.esFavorita(pelicula.imdbID, usuario)}" 
+                          th:action="@{'/favoritos-peliculas/agregar/' + ${pelicula.imdbID}}" method="post">
+                        <button type="submit" class="btn-favorite">❤️ Añadir a favoritos</button>
+                    </form>
+                    <form th:if="${peliculaService.esFavorita(pelicula.imdbID, usuario)}" 
+                          th:action="@{'/favoritos-peliculas/eliminar/' + ${pelicula.imdbID}}" method="post">
+                        <button type="submit" class="btn-remove">❌ Eliminar de favoritos</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

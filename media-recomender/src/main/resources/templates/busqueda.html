@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados de Búsqueda</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <a th:href="@{/dashboard}">Volver al Dashboard</a>
+        </nav>
+
+        <h1>Resultados para: <span th:text="${query}"></span></h1>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div th:if="${resultados.empty}">
+            <p>No se encontraron resultados para tu búsqueda.</p>
+        </div>
+
+        <div class="resultados-grid">
+            <div class="libro-card" th:each="libro : ${resultados}">
+                <img th:if="${libro.portadaUrl}" th:src="${libro.portadaUrl}" alt="Portada">
+                <div class="libro-info">
+                    <h3 th:text="${libro.titulo}"></h3>
+                    <p th:text="${libro.autores}"></p>
+                    
+                    <form th:if="${!libro.esFavorito}" th:action="@{'/favoritos/agregar/' + ${libro.id}}" method="post">
+                        <button type="submit" class="btn-favorite">❤️ Añadir a favoritos</button>
+                    </form>
+                    <form th:if="${libro.esFavorito}" th:action="@{'/favoritos/eliminar/' + ${libro.id}}" method="post">
+                        <button type="submit" class="btn-remove">❌ Eliminar de favoritos</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
