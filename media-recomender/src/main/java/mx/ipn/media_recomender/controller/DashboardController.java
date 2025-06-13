@@ -45,55 +45,50 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String showDashboard(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        Usuario usuario = usuarioRepository.findByUsername(userDetails.getUsername())
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
-        List<LibroFavorito> favoritos = libroService.obtenerFavoritosActivos(usuario);
-        List<PeliculaFavorita> peliculasFavoritas = peliculaService.obtenerFavoritasActivas(usuario);
-        
-        // Recomendaciones de libros
-        GoogleBooksResponse recomendacionesLibros = googleBooksService
+        try {
+            Usuario usuario = usuarioRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            
+            List<LibroFavorito> favoritos = libroService.obtenerFavoritosActivos(usuario);
+            List<PeliculaFavorita> peliculasFavoritas = peliculaService.obtenerFavoritasActivas(usuario);
+            
+            // Simplificar temporalmente las recomendaciones para pruebas
+            GoogleBooksResponse recomendaciones = googleBooksService
             .obtenerRecomendacionesBasadasEnFavoritos(favoritos)
             .blockOptional()
             .orElse(new GoogleBooksResponse());
         
-        // Recomendaciones de películas
-        OmdbMovieResponse recomendacionesPeliculas = omdbService
-            .obtenerRecomendacionesBasadasEnFavoritos(peliculasFavoritas)
-            .blockOptional()
-            .orElse(new OmdbMovieResponse());
-        
-        // Procesamiento de recomendaciones de libros...
-        if(recomendacionesLibros.getItems() == null || recomendacionesLibros.getItems().size() < 6) {
-            GoogleBooksResponse librosGenerales = googleBooksService
-                .buscarRecomendaciones("fiction")
-                .blockOptional()
-                .orElse(new GoogleBooksResponse());
-            
-            if(recomendacionesLibros.getItems() == null) {
-                recomendacionesLibros.setItems(librosGenerales.getItems());
-            } else {
-                recomendacionesLibros.getItems().addAll(librosGenerales.getItems());
+            // Si no hay suficientes recomendaciones, agregar algunas generales
+            if(recomendaciones.getItems() == null || recomendaciones.getItems().size() < 6) {
+                GoogleBooksResponse librosGenerales = googleBooksService
+                    .buscarRecomendaciones("fiction")
+                    .blockOptional()
+                    .orElse(new GoogleBooksResponse());
+                
+                if(recomendaciones.getItems() == null) {
+                    recomendaciones.setItems(librosGenerales.getItems());
+                } else {
+                    recomendaciones.getItems().addAll(librosGenerales.getItems());
+                }
             }
-        }
-        
-        List<GoogleBooksResponse.BookItem> recomendacionesLibrosLimitadas = recomendacionesLibros.getItems().stream()
-            .limit(6)
-            .collect(Collectors.toList());
-        
-        List<OmdbMovieResponse.MovieItem> recomendacionesPeliculasLimitadas = 
-            recomendacionesPeliculas.getSearch() != null ?
-            recomendacionesPeliculas.getSearch().stream()
+            
+            // Limitar a 6 recomendaciones para la vista
+            List<GoogleBooksResponse.BookItem> recomendacionesLimitadas = recomendaciones.getItems().stream()
                 .limit(6)
-                .collect(Collectors.toList()) :
-            Collections.emptyList();
-        
-        model.addAttribute("usuario", usuario);
-        model.addAttribute("favoritos", favoritos);
-        model.addAttribute("peliculasFavoritas", peliculasFavoritas);
-        model.addAttribute("recomendacionesLibros", recomendacionesLibrosLimitadas);
-        model.addAttribute("recomendacionesPeliculas", recomendacionesPeliculasLimitadas);
-        
-        return "dashboard";
+                .collect(Collectors.toList());
+                
+            model.addAttribute("usuario", usuario);
+            model.addAttribute("favoritos", favoritos);
+            model.addAttribute("peliculasFavoritas", peliculasFavoritas);
+            
+            // Temporarily disable API calls for debugging
+            model.addAttribute("recomendaciones", recomendacionesLimitadas);
+            model.addAttribute("recomendacionesPeliculas", Collections.emptyList());
+            
+            return "dashboard";
+        } catch (Exception e) {
+            // Log the error and redirect to error page
+            return "redirect:/error?message=" + e.getMessage();
+        }
     }
 }

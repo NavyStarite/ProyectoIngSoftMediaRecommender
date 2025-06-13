@@ -20,13 +20,11 @@ public class SecurityConfig {
         this.usuarioDetailsService = usuarioDetailsService;
     }
 
-    @Bean
+   @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/registro", "/login", "/css/**", "/js/**").permitAll()
-                .requestMatchers("/buscar").authenticated()
-                .requestMatchers("/favoritos/**", "/favoritos-peliculas/**").authenticated()
+                .requestMatchers("/", "/registro", "/login", "/css/**", "/js/**", "/error").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -35,12 +33,15 @@ public class SecurityConfig {
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
+            .exceptionHandling(ex -> ex
+                .accessDeniedPage("/error?accessDenied")
+            )
             .logout(logout -> logout
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
             )
-            .userDetailsService(usuarioDetailsService); // Esta línea es crucial
-
+            .userDetailsService(usuarioDetailsService);
+        
         return http.build();
     }
 
