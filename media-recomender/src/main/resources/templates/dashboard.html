@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Media Recommender</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Bienvenido, <span th:text="${usuario.username}"></span>!</h1>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn">Cerrar sesión</button>
+            </form>
+        </header>
+        
+        <div class="user-profile">
+            <h2>Información de tu cuenta</h2>
+            <div class="profile-details">
+                <p><strong>Email:</strong> <span th:text="${usuario.email}"></span></p>
+                <p><strong>Miembro desde:</strong> 
+                    <span th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm')}"></span>
+                </p>
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <div class="dashboard-card">
+                <h2>Recomendaciones</h2>
+                <p>Contenido personalizado para ti</p>
+            </div>
+            
+            <div class="dashboard-card">
+                <h2>Tu actividad</h2>
+                <p>Historial y estadísticas</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
