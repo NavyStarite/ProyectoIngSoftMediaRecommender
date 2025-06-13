@@ -249,7 +249,26 @@ a:hover {
 }
 
 
-/* Estilos para películas */
+/* Estilos para las pestañas de búsqueda */
+.search-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.search-tabs a {
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #333;
+    border-bottom: 3px solid transparent;
+}
+
+.search-tabs a.active {
+    border-bottom-color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Estilos para las tarjetas de películas */
 .movie-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -262,6 +281,11 @@ a:hover {
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
 }
 
 .movie-card img {
@@ -275,6 +299,44 @@ a:hover {
     margin: 0 0 5px 0;
     font-size: 16px;
 }
+
+.movie-info p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* Alertas de éxito y error */
+.alert {
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+
 
 
 

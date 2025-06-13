@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados de Búsqueda - Películas</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <a th:href="@{/dashboard}">Volver al Dashboard</a>
+        </nav>
+
+        <h1>Películas encontradas para: <span th:text="${query}"></span></h1>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div th:if="${resultadosPeliculas == null or resultadosPeliculas.empty}">
+            <div class="empty-state">
+                <p>No se encontraron películas para tu búsqueda.</p>
+            </div>
+        </div>
+
+        <div th:unless="${resultadosPeliculas == null or resultadosPeliculas.empty}" class="movie-grid">
+            <div class="movie-card" th:each="pelicula : ${resultadosPeliculas}">
+                <img th:if="${pelicula.poster != null and pelicula.poster != 'N/A'}" 
+                     th:src="${pelicula.poster}" 
+                     alt="Poster de la película">
+                <div class="movie-info">
+                    <h3 th:text="${pelicula.title}"></h3>
+                    <p><strong>Año:</strong> <span th:text="${pelicula.year}"></span></p>
+                    <p th:if="${pelicula.genre != null and pelicula.genre != 'N/A'}">
+                        <strong>Género:</strong> <span th:text="${pelicula.genre}"></span>
+                    </p>
+                    <p th:if="${pelicula.director != null and pelicula.director != 'N/A'}">
+                        <strong>Director:</strong> <span th:text="${pelicula.director}"></span>
+                    </p>
+                    
+                    <form th:if="${!pelicula.esFavorita}" th:action="@{'/favoritos/agregar/pelicula/' + ${pelicula.imdbId}}" method="post">
+                        <button type="submit" class="btn-favorite">❤️ Añadir a favoritos</button>
+                    </form>
+                    <form th:if="${pelicula.esFavorita}" th:action="@{'/favoritos/eliminar/pelicula/' + ${pelicula.imdbId}}" method="post">
+                        <button type="submit" class="btn-remove">❌ Eliminar de favoritos</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

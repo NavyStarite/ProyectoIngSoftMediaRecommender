@@ -4,11 +4,126 @@
     <meta charset="UTF-8">
     <title>Dashboard - Media Recommender</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        /* Estilos para las secciones colapsables */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .section-header:hover {
+            background-color: #f8f9fa;
+            padding-left: 10px;
+            border-radius: 8px;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: 2px solid #4CAF50;
+            color: #4CAF50;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+        
+        .toggle-btn:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .toggle-btn.collapsed {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+        
+        .toggle-btn.collapsed:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .section-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+        
+        .section-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+        
+        .section-wrapper {
+            margin-bottom: 40px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Animación suave para iconos */
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+        }
+        
+        .toggle-icon.collapsed {
+            transform: rotate(180deg);
+        }
+        
+        /* Contador de elementos */
+        .item-count {
+            background-color: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        /* Botón para colapsar/expandir todo */
+        .master-controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .master-toggle {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .master-toggle:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
     <!-- Agrega esto al inicio del dashboard -->
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    
     <div class="dashboard-container">
         <!-- Barra de navegación -->
         <nav class="dashboard-nav">
@@ -20,55 +135,265 @@
                 </form>
             </div>
         </nav>
+        
         <!-- Barra de búsqueda-->
         <div class="search-section">
             <form th:action="@{/buscar}" method="get" class="search-form">
                 <input type="text" name="query" placeholder="Buscar libros...">
-                <button type="submit">Buscar</button>
+                <button type="submit">Buscar Libros</button>
             </form>
-        </div> 
-        <!-- Sección de favoritos -->
-        <div class="favoritos-section">
-            <h2>Tus Libros Favoritos</h2>
-            <div th:if="${favoritos.empty}" class="empty-state">
-                <p>Aún no tienes libros favoritos. ¡Comienza a buscar y añade algunos!</p>
+            <br>
+            <form th:action="@{/buscar/peliculas}" method="get" class="search-form">
+                <input type="text" name="query" placeholder="Buscar películas...">
+                <button type="submit">Buscar Películas</button>
+            </form>
+        </div>
+        
+        <!-- Controles maestros -->
+        <div class="master-controls">
+            <button onclick="toggleAllSections()" class="master-toggle" id="masterToggle">
+                Colapsar Todo
+            </button>
+        </div>
+        
+        <!-- Sección de películas favoritas -->
+        <div class="section-wrapper" th:unless="${favoritosPeliculas.empty}">
+            <div class="section-header" onclick="toggleSection('favoritas-peliculas')">
+                <div>
+                    <h2>🎬 Tus Películas Favoritas</h2>
+                    <span class="item-count" th:text="${#lists.size(favoritosPeliculas)}"></span>
+                </div>
+                <button class="toggle-btn" id="btn-favoritas-peliculas">
+                    Ocultar <span class="toggle-icon">▼</span>
+                </button>
             </div>
-            <div th:unless="${favoritos.empty}" class="favoritos-grid">
-                <div class="libro-card" th:each="favorito : ${favoritos}">
-                    <img th:if="${favorito.portadaUrl}" 
-                         th:src="${favorito.portadaUrl}" 
-                         alt="Portada del libro">
-                    <div class="libro-info">
-                        <h3 th:text="${favorito.titulo}"></h3>
-                        <p th:text="${favorito.autores}"></p>
-                        <form th:action="@{'/favoritos/eliminar/' + ${favorito.libroId}}" method="post">
-                            <button type="submit" class="btn-remove">❌ Eliminar</button>
-                        </form>
+            <div class="section-content" id="content-favoritas-peliculas">
+                <div class="movie-grid">
+                    <div class="movie-card" th:each="favorita : ${favoritosPeliculas}">
+                        <img th:if="${favorita.posterUrl}" 
+                            th:src="${favorita.posterUrl}" 
+                            alt="Poster de la película">
+                        <div class="movie-info">
+                            <h3 th:text="${favorita.titulo}"></h3>
+                            <p th:text="${favorita.anio}"></p>
+                            <form th:action="@{'/favoritos/eliminar/pelicula/' + ${favorita.imdbId}}" method="post">
+                                <button type="submit" class="btn-remove">❌ Eliminar</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sección de recomendaciones -->
-        <div class="recomendaciones-section">
-            <h2>Recomendaciones para ti</h2>
-            <div class="recomendaciones-grid">
-                <div class="libro-card" th:each="libro : ${recomendaciones}">
-                    <img th:if="${libro.volumeInfo.imageLinks != null}" 
-                         th:src="${libro.volumeInfo.imageLinks.thumbnail}" 
-                         alt="Portada del libro">
-                    <div class="libro-info">
-                        <h3 th:text="${libro.volumeInfo.title}"></h3>
-                        <p th:if="${libro.volumeInfo.authors != null}">
-                            <span th:text="${#strings.listJoin(libro.volumeInfo.authors, ', ')}"></span>
-                        </p>
-                        <form th:action="@{'/favoritos/agregar/' + ${libro.id}}" method="post">
-                            <button type="submit" class="btn-favorite">❤️ Añadir a favoritos</button>
-                        </form>
+        <!-- Sección de libros favoritos -->
+        <div class="section-wrapper">
+            <div class="section-header" onclick="toggleSection('favoritos-libros')">
+                <div>
+                    <h2>📚 Tus Libros Favoritos</h2>
+                    <span class="item-count" th:text="${#lists.size(favoritos)}"></span>
+                </div>
+                <button class="toggle-btn" id="btn-favoritos-libros">
+                    Ocultar <span class="toggle-icon">▼</span>
+                </button>
+            </div>
+            <div class="section-content" id="content-favoritos-libros">
+                <div th:if="${favoritos.empty}" class="empty-state">
+                    <p>Aún no tienes libros favoritos. ¡Comienza a buscar y añade algunos!</p>
+                </div>
+                <div th:unless="${favoritos.empty}" class="favoritos-grid">
+                    <div class="libro-card" th:each="favorito : ${favoritos}">
+                        <img th:if="${favorito.portadaUrl}" 
+                             th:src="${favorito.portadaUrl}" 
+                             alt="Portada del libro">
+                        <div class="libro-info">
+                            <h3 th:text="${favorito.titulo}"></h3>
+                            <p th:text="${favorito.autores}"></p>
+                            <form th:action="@{'/favoritos/eliminar/' + ${favorito.libroId}}" method="post">
+                                <button type="submit" class="btn-remove">❌ Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sección de recomendaciones de películas -->
+        <div class="section-wrapper" th:unless="${recomendacionesPeliculas.empty}">
+            <div class="section-header" onclick="toggleSection('recomendaciones-peliculas')">
+                <div>
+                    <h2>🎭 Películas Recomendadas</h2>
+                    <span class="item-count" th:text="${#lists.size(recomendacionesPeliculas)}"></span>
+                </div>
+                <button class="toggle-btn" id="btn-recomendaciones-peliculas">
+                    Ocultar <span class="toggle-icon">▼</span>
+                </button>
+            </div>
+            <div class="section-content" id="content-recomendaciones-peliculas">
+                <div class="movie-grid">
+                    <div class="movie-card" th:each="pelicula : ${recomendacionesPeliculas}">
+                        <img th:if="${pelicula.poster}" 
+                            th:src="${pelicula.poster}" 
+                            alt="Poster de la película">
+                        <div class="movie-info">
+                            <h3 th:text="${pelicula.title}"></h3>
+                            <p th:text="${pelicula.year}"></p>
+                            <form th:action="@{'/favoritos/agregar/pelicula/' + ${pelicula.imdbId}}" method="post">
+                                <button type="submit" class="btn-favorite">❤️ Añadir a favoritos</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sección de recomendaciones de libros -->
+        <div class="section-wrapper" th:unless="${recomendaciones.empty}">
+            <div class="section-header" onclick="toggleSection('recomendaciones-libros')">
+                <div>
+                    <h2>📖 Libros Recomendados</h2>
+                    <span class="item-count" th:text="${#lists.size(recomendaciones)}"></span>
+                </div>
+                <button class="toggle-btn" id="btn-recomendaciones-libros">
+                    Ocultar <span class="toggle-icon">▼</span>
+                </button>
+            </div>
+            <div class="section-content" id="content-recomendaciones-libros">
+                <div class="recomendaciones-grid">
+                    <div class="libro-card" th:each="libro : ${recomendaciones}">
+                        <img th:if="${libro.volumeInfo.imageLinks != null}" 
+                             th:src="${libro.volumeInfo.imageLinks.thumbnail}" 
+                             alt="Portada del libro">
+                        <div class="libro-info">
+                            <h3 th:text="${libro.volumeInfo.title}"></h3>
+                            <p th:if="${libro.volumeInfo.authors != null}">
+                                <span th:text="${#strings.listJoin(libro.volumeInfo.authors, ', ')}"></span>
+                            </p>
+                            <form th:action="@{'/favoritos/agregar/' + ${libro.id}}" method="post">
+                                <button type="submit" class="btn-favorite">❤️ Añadir a favoritos</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Estado de las secciones (todas expandidas por defecto)
+        let sectionsState = {
+            'favoritas-peliculas': true,
+            'favoritos-libros': true,
+            'recomendaciones-peliculas': true,
+            'recomendaciones-libros': true
+        };
+
+        function toggleSection(sectionId) {
+            const content = document.getElementById('content-' + sectionId);
+            const button = document.getElementById('btn-' + sectionId);
+            const icon = button.querySelector('.toggle-icon');
+            
+            if (!content || !button) return;
+            
+            const isExpanded = sectionsState[sectionId];
+            
+            if (isExpanded) {
+                // Colapsar
+                content.classList.add('collapsed');
+                button.classList.add('collapsed');
+                button.innerHTML = 'Mostrar <span class="toggle-icon collapsed">▼</span>';
+                sectionsState[sectionId] = false;
+            } else {
+                // Expandir
+                content.classList.remove('collapsed');
+                button.classList.remove('collapsed');
+                button.innerHTML = 'Ocultar <span class="toggle-icon">▼</span>';
+                sectionsState[sectionId] = true;
+            }
+            
+            updateMasterToggle();
+        }
+
+        function toggleAllSections() {
+            const masterBtn = document.getElementById('masterToggle');
+            const allExpanded = Object.values(sectionsState).every(state => state === true);
+            
+            // Cambiar el estado de todas las secciones
+            Object.keys(sectionsState).forEach(sectionId => {
+                const content = document.getElementById('content-' + sectionId);
+                const button = document.getElementById('btn-' + sectionId);
+                
+                if (!content || !button) return;
+                
+                if (allExpanded) {
+                    // Colapsar todas
+                    content.classList.add('collapsed');
+                    button.classList.add('collapsed');
+                    button.innerHTML = 'Mostrar <span class="toggle-icon collapsed">▼</span>';
+                    sectionsState[sectionId] = false;
+                } else {
+                    // Expandir todas
+                    content.classList.remove('collapsed');
+                    button.classList.remove('collapsed');
+                    button.innerHTML = 'Ocultar <span class="toggle-icon">▼</span>';
+                    sectionsState[sectionId] = true;
+                }
+            });
+            
+            updateMasterToggle();
+        }
+
+        function updateMasterToggle() {
+            const masterBtn = document.getElementById('masterToggle');
+            const allExpanded = Object.values(sectionsState).every(state => state === true);
+            const allCollapsed = Object.values(sectionsState).every(state => state === false);
+            
+            if (allExpanded) {
+                masterBtn.textContent = 'Colapsar Todo';
+                masterBtn.style.backgroundColor = '#17a2b8';
+            } else if (allCollapsed) {
+                masterBtn.textContent = 'Expandir Todo';
+                masterBtn.style.backgroundColor = '#28a745';
+            } else {
+                masterBtn.textContent = 'Colapsar Todo';
+                masterBtn.style.backgroundColor = '#6c757d';
+            }
+        }
+
+        // Inicializar el estado al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            updateMasterToggle();
+            
+            // Guardar preferencias en localStorage si está disponible
+            try {
+                const savedState = localStorage.getItem('dashboardSectionsState');
+                if (savedState) {
+                    const parsedState = JSON.parse(savedState);
+                    Object.keys(parsedState).forEach(sectionId => {
+                        if (sectionsState.hasOwnProperty(sectionId) && !parsedState[sectionId]) {
+                            toggleSection(sectionId);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log('LocalStorage no disponible');
+            }
+        });
+
+        // Guardar estado cuando cambie
+        function saveState() {
+            try {
+                localStorage.setItem('dashboardSectionsState', JSON.stringify(sectionsState));
+            } catch (e) {
+                console.log('No se pudo guardar el estado');
+            }
+        }
+
+        // Sobrescribir toggleSection para incluir guardado
+        const originalToggleSection = toggleSection;
+        toggleSection = function(sectionId) {
+            originalToggleSection(sectionId);
+            saveState();
+        };
+    </script>
 </body>
 </html>
